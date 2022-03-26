@@ -14,7 +14,6 @@ namespace IS
 		std::unordered_map<std::string, int> Registri;
 		std::vector<std::string> ListaInstrukcija;
 		inline static int line_counter=0;
-
 	public:
 		Procesor();
 		~Procesor();
