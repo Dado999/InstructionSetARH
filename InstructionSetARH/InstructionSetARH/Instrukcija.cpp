@@ -43,6 +43,11 @@ IS::Instrukcija::Instrukcija(std::string a)
 	}
 }
 
+void IS::Instrukcija::IzvrsiInstrukiju()
+{
+
+}
+
 IS::Instrukcija::~Instrukcija()
 {
 

@@ -1,6 +1,7 @@
 #include "Procesor.h"
 #include<iostream>
 #include<vector>
+#include <cctype>
 #include<fstream>
 
 IS::Procesor::Procesor()
@@ -22,16 +23,44 @@ void IS::Procesor::Izvrsavanje()
 {
 	getInstructions();
 	for (std::string line=ListaInstrukcija[line_counter] ; line_counter < ListaInstrukcija.size() ; line_counter++)
-	
 	{
-		if (!strcmp("BREAKPOINT_START", line.c_str())) {
-			continue;
-			while (!(strcmp(line.c_str(), "BREAKPOINT_END")) && line_counter + 1 < ListaInstrukcija.size())
+		if (!strcmp("BREAKPOINT", line.c_str())) {
+			char c;
+			std::cout << "Za next step unesi N, a za prelazak na sledeci BREAKPOINT unesi B." << std::endl;
+			std::cin >> c;
+			while (c == 'N')
 			{
-				//Instrukcija instrukcija(line);
+				line=ListaInstrukcija[++line_counter];
+				if (!strcmp(line, "BREAKPOINT"))
+				{
+					line_counter--;
+					continue;
+				}
+				Instrukcija a(line);
+				a.IzvrsiInstrukiju();
+				this->statusRegistara();
+				this->statusMemorije();
+				std::cout << "Za next step unesi N, a za prelazak na sledeci BREAKPOINT unesi B." << std::endl;
+				std::cin >> c;
 			}
+			if (c == 'B')
+			{
+				line_counter++;
+				while (strcmp(line = ListaInstrukcija[line_counter], "BREAKPOINT") && line_counter + 1 < ListaInstrukcija.size())
+					line_counter++;
+				line_counter--;
+			}
+
+		}
+		else
+		{
+			Instrukcija a(line);
+			a.IzvrsiInstrukiju();
 		}
 	}
+	std::cout << "Izvrsavanje zavrseno!" << std::endl;
+	statusMemorije();
+	statusRegistara();
 }
 
 void IS::Procesor::pravljenjeRegistara()
