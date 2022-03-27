@@ -13,7 +13,8 @@ namespace IS
 		Instrukcija(std::string argument1, std::string argument2, std::string naziv);
 		Instrukcija();
 		Instrukcija(std::string);
-		void IzvrsiInstrukiju();
+		void pokazivac();
 		~Instrukcija();
-	};
+		friend class Procesor;
+	}; 
 }
