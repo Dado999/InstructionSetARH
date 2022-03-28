@@ -25,5 +25,6 @@ namespace IS
 		int provjeraSintakse();
 		void Izvrsavanje();
 		void IzvrsavanjeInstrukcije(Instrukcija);
+		void pokazivac(Instrukcija);
 	};
 }

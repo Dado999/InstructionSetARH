@@ -44,18 +44,4 @@ IS::Instrukcija::Instrukcija(std::string a)
 
 IS::Instrukcija::~Instrukcija(){}
 
-void IS::Instrukcija::pokazivac()
-{
-	if (argument1.find('[') >= 0)
-	{
-		argument1.erase(std::remove(argument1.begin(), argument1.end(), '['), argument1.end());
-		argument1.erase(std::remove(argument1.begin(), argument1.end(), ']'), argument1.end());
-	}
-	else if (argument2.find('[') >= 0)
-	{
-		argument2.erase(std::remove(argument2.begin(), argument2.end(), '['), argument2.end());
-		argument2.erase(std::remove(argument2.begin(), argument2.end(), ']'), argument2.end());
-	}
-}
-
 

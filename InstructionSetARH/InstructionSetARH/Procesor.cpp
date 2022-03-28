@@ -1,5 +1,6 @@
 #include "Procesor.h"
 #include<iostream>
+#include<string>
 #include<vector>
 #include<cctype>
 #include<fstream>
@@ -77,6 +78,7 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 	{
 		if (!(a.argument1.empty()) && !(a.argument2.empty()))
 		{
+			pokazivac(a);
 			if (Registri.contains(a.argument1))
 			{
 				if (Registri.contains(a.argument2))
@@ -85,6 +87,20 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					auto t2 = Registri.find(a.argument2);
 					t1->second = t1->second + t2->second;
 				}
+				else if ()
+				{
+					
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = Registri.find(a.argument1);
+					t1->second = t1->second + temp;
+				}
+			}
+			else if (Registri.contains(a.argument2))
+			{
+
 			}
 		}
 
@@ -133,6 +149,44 @@ void IS::Procesor::pronadjiLabele()
 	}
 }
 
+void IS::Procesor::pokazivac(Instrukcija a)
+{
+	if (a.argument1.find('[') >= 0)
+	{
+		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), '['), a.argument1.end());
+		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), ']'), a.argument1.end());
 
+		if (Registri.contains(a.argument1))
+		{
+			auto t1 = Registri.find(a.argument1);
+			std::string temp = std::to_string(t1->second);
+			a.argument1 = temp;
+		}
+		else if (Memorija.contains(a.argument1))
+		{
+			auto t1 = Memorija.find(a.argument1);
+			std::string temp = std::to_string(t1->second);
+			a.argument1 = temp;
+		}
+	}
+	else if (a.argument2.find('[') >= 0)
+	{
+		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), '['), a.argument2.end());
+		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), ']'), a.argument2.end());
+
+		if (Registri.contains(a.argument2))
+		{
+			auto t1 = Registri.find(a.argument2);
+			std::string temp = std::to_string(t1->second);
+			a.argument2 = temp;
+		}
+		else if (Memorija.contains(a.argument2))
+		{
+			auto t1 = Memorija.find(a.argument2);
+			std::string temp = std::to_string(t1->second);
+			a.argument2 = temp;
+		}
+	}
+}
 
 
