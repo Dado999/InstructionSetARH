@@ -8,7 +8,6 @@ using namespace IS;
 int main()
 {
 	Procesor a;
-	Instrukcija b("ADD EAX EBX");
-	a.IzvrsavanjeInstrukcije(b);
+	
 }
 
