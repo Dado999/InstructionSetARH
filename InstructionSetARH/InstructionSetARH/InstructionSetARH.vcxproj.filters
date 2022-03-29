@@ -24,12 +24,18 @@
     <ClCompile Include="Instrukcija.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Memorija.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Procesor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Instrukcija.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memorija.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,12 +1,41 @@
-BREAKPOINT
-MOV [1] 2
-MOV EAX 3
-ADD EAX 5
-BREAKPOINT
-MOV EBX 3
-CMP EAX EBX
-JNE LABEL1
-MOV ECX EBX
-SUB ECX 1
-LABEL1:
-hello ADD EAX EBX
+.data
+	def a1 34
+	def b 6
+	def c 9
+	def a 3
+.bss
+	res d 
+	res e
+	res f
+.text
+	mov [a] 3
+	and [a] 3
+	store [a] [b]
+	add [a] b
+	add a [b]
+	and a b
+	and a 3
+	and [a] b
+	and a [b]
+	*store [a] 33
+	cmp [a] [b]
+	*mov EAX EBX
+	add d 5
+	add a 3
+	*store c 10
+	jne labela
+	sub b 6
+	*store c 99
+	add f 3
+	add EAX 6
+	sub EBX 3
+	store a 3
+	store b 4
+	not a
+	in a
+	out a
+	add a 3
+	store EAX 4
+	mov EBX EAX
+	labela:
+	out a
