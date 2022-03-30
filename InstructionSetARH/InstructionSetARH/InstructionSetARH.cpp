@@ -8,6 +8,5 @@ using namespace IS;
 int main()
 {
 	Procesor a;
-	
 }
 
