@@ -445,7 +445,6 @@ void IS::Procesor::pokazivac(Instrukcija a)
 	{
 		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), '['), a.argument1.end());
 		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), ']'), a.argument1.end());
-
 		if (Registri.contains(a.argument1))
 		{
 			auto t1 = Registri.find(a.argument1);
@@ -463,7 +462,6 @@ void IS::Procesor::pokazivac(Instrukcija a)
 	{
 		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), '['), a.argument2.end());
 		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), ']'), a.argument2.end());
-
 		if (Registri.contains(a.argument2))
 		{
 			auto t1 = Registri.find(a.argument2);
