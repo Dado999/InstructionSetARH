@@ -108,6 +108,12 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					auto t2 = Registri.find(a.argument2);
 					t1->second = t1->second + t2->second;
 				}
+				else if (memorija.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second + t2->second;
+				}
 				else
 				{
 					long long temp = stoll(a.argument2, nullptr, 10);
@@ -117,11 +123,289 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			}
 			else if (Registri.contains(a.argument2))
 			{
-
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = Registri.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second + t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = Registri.find(a.argument2);
+					t1->second = t1->second + temp;
+				}
+			}
+			else if (memorija.contains(a.argument1))
+			{
+				if (memorija.contains(a.argument2))
+				{
+					auto t1 = memorija.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second + t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = memorija.find(a.argument1);
+					t1->second = t1->second + temp;
+				}
+			}
+			else if (memorija.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = memorija.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second + t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = memorija.find(a.argument2);
+					t1->second = t1->second + temp;
+				}
 			}
 		}
-
-
+		else
+		{
+			std::cout << "Greska u kodu!" << std::endl;
+			std::exit(-1);
+		}
+	}
+	if (!(strcmp(a.naziv.c_str(), "SUB")))
+	{
+		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		{
+			pokazivac(a);
+			if (Registri.contains(a.argument1))
+			{
+				if (Registri.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = Registri.find(a.argument2);
+					t1->second = t1->second - t2->second;
+				}
+				else if (memorija.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second - t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = Registri.find(a.argument1);
+					t1->second = t1->second - temp;
+				}
+			}
+			else if (Registri.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = Registri.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second - t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = Registri.find(a.argument2);
+					t1->second = t1->second - temp;
+				}
+			}
+			else if (memorija.contains(a.argument1))
+			{
+				if (memorija.contains(a.argument2))
+				{
+					auto t1 = memorija.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second - t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = memorija.find(a.argument1);
+					t1->second = t1->second - temp;
+				}
+			}
+			else if (memorija.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = memorija.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second - t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = memorija.find(a.argument2);
+					t1->second = t1->second - temp;
+				}
+			}
+		}
+		else
+		{
+			std::cout << "Greska u kodu!" << std::endl;
+			std::exit(-1);
+		}
+	}
+	if (!(strcmp(a.naziv.c_str(), "AND")))
+	{
+		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		{
+			pokazivac(a);
+			if (Registri.contains(a.argument1))
+			{
+				if (Registri.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = Registri.find(a.argument2);
+					t1->second = t1->second & t2->second;
+				}
+				else if (memorija.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second & t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = Registri.find(a.argument1);
+					t1->second = t1->second & temp;
+				}
+			}
+			else if (Registri.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = Registri.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second & t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = Registri.find(a.argument2);
+					t1->second = t1->second & temp;
+				}
+			}
+			else if (memorija.contains(a.argument1))
+			{
+				if (memorija.contains(a.argument2))
+				{
+					auto t1 = memorija.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second & t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = memorija.find(a.argument1);
+					t1->second = t1->second & temp;
+				}
+			}
+			else if (memorija.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = memorija.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second & t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = memorija.find(a.argument2);
+					t1->second = t1->second & temp;
+				}
+			}
+		}
+		else
+		{
+			std::cout << "Greska u kodu!" << std::endl;
+			std::exit(-1);
+		}
+	}
+	if (!(strcmp(a.naziv.c_str(), "OR")))
+	{
+		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		{
+			pokazivac(a);
+			if (Registri.contains(a.argument1))
+			{
+				if (Registri.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = Registri.find(a.argument2);
+					t1->second = t1->second | t2->second;
+				}
+				else if (memorija.contains(a.argument2))
+				{
+					auto t1 = Registri.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second | t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = Registri.find(a.argument1);
+					t1->second = t1->second | temp;
+				}
+			}
+			else if (Registri.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = Registri.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second | t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = Registri.find(a.argument2);
+					t1->second = t1->second | temp;
+				}
+			}
+			else if (memorija.contains(a.argument1))
+			{
+				if (memorija.contains(a.argument2))
+				{
+					auto t1 = memorija.find(a.argument1);
+					auto t2 = memorija.find(a.argument2);
+					t1->second = t1->second | t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument2, nullptr, 10);
+					auto t1 = memorija.find(a.argument1);
+					t1->second = t1->second | temp;
+				}
+			}
+			else if (memorija.contains(a.argument2))
+			{
+				if (memorija.contains(a.argument1))
+				{
+					auto t1 = memorija.find(a.argument2);
+					auto t2 = memorija.find(a.argument1);
+					t1->second = t1->second | t2->second;
+				}
+				else
+				{
+					long long temp = stoll(a.argument1, nullptr, 10);
+					auto t1 = memorija.find(a.argument2);
+					t1->second = t1->second | temp;
+				}
+			}
+		}
+		else
+		{
+			std::cout << "Greska u kodu!" << std::endl;
+			std::exit(-1);
+		}
 	}
 }
 
