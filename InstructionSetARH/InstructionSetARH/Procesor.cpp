@@ -8,9 +8,7 @@
 IS::Procesor::Procesor()
 {
 	pravljenjeRegistara();
-	getInstructions();
-	ucitavanjePodataka();
-	statusMemorije();
+	statusRegistara();
 }
 
 IS::Procesor::~Procesor()
@@ -452,19 +450,25 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				{
 					auto t1 = Registri.find(a.argument1);
 					auto t2 = Registri.find(a.argument2);
-					cmp = (t1->second - t2->second) ? 0 : 1;
+					if (t1->second > t2->second) cmp = 1;
+					else if (t1->second == t2->second) cmp = 0;
+					else if (t1->second < t2->second) cmp = -1;
 				}
 				else if (memorija.contains(a.argument2))
 				{
 					auto t1 = Registri.find(a.argument1);
 					auto t2 = memorija.find(a.argument2);
-					cmp = (t1->second - t2->second) ? 0 : 1;
+					if (t1->second > t2->second) cmp = 1;
+					else if (t1->second == t2->second) cmp = 0;
+					else if (t1->second < t2->second) cmp = -1;
 				}
 				else
 				{
-					long long temp = stoll(a.argument2, nullptr, 10);
 					auto t1 = Registri.find(a.argument1);
-					cmp = (t1->second - temp) ? 1 : 0;
+					long long temp = stoll(a.argument2, nullptr, 10);
+					if (t1->second > temp) cmp = 1;
+					else if (t1->second == temp) cmp = 0;
+					else if (t1->second < temp) cmp = -1;
 				}
 			}
 			else if (Registri.contains(a.argument2))
@@ -473,13 +477,17 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				{
 					auto t1 = Registri.find(a.argument2);
 					auto t2 = memorija.find(a.argument1);
-					t1->second = t1->second | t2->second;
+					if (t1->second > t2->second) cmp = 1;
+					else if (t1->second == t2->second) cmp = 0;
+					else if (t1->second < t2->second) cmp = -1;
 				}
 				else
 				{
 					long long temp = stoll(a.argument1, nullptr, 10);
 					auto t1 = Registri.find(a.argument2);
-					cmp = (t1->second - temp) ? 1 : 0;
+					if (temp > t1->second) cmp = 1;
+					else if (temp == t1->second) cmp = 0;
+					else if (temp < t1->second) cmp = -1;
 				}
 			}
 			else if (memorija.contains(a.argument1))
@@ -488,26 +496,34 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				{
 					auto t1 = memorija.find(a.argument1);
 					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second | t2->second;
+					if (t1->second > t2->second) cmp = 1;
+					else if (t1->second == t2->second) cmp = 0;
+					else if (t1->second < t2->second) cmp = -1;
 				}
 				else
 				{
 					long long temp = stoll(a.argument2, nullptr, 10);
 					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second | temp;
+					if (t1->second > temp) cmp = 1;
+					else if (t1->second == temp) cmp = 0;
+					else if (t1->second < temp) cmp = -1;
 				}
 			}
 			else if (memorija.contains(a.argument2))
 			{
 				long long temp = stoll(a.argument1, nullptr, 10);
 				auto t1 = memorija.find(a.argument2);
-				cmp = (t1->second - temp) ? 1 : 0;
+				if (temp > t1->second) cmp = 1;
+				else if (temp == t1->second) cmp = 0;
+				else if (temp < t1->second) cmp = -1;
 			}
 			else
 			{
 				long long temp1 = stoll(a.argument1, nullptr, 10);
 				long long temp2 = stoll(a.argument2, nullptr, 10);
-				cmp = (temp1-temp2) ? 1 : 0;
+				if (temp1 > temp2) cmp = 1;
+				else if (temp1 == temp2) cmp = 0;
+				else if (temp1 < temp2) cmp = -1;
 			}
 		}
 		else
@@ -516,13 +532,80 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			std::exit(-1);
 		}
 	}
-
+	if (!(strcmp(a.naziv.c_str(), "JE")))
+	{
+		if (!cmp)
+		{
+			if (Labele.contains(a.argument1)) {
+				auto t1 = Labele.find(a.argument1);
+				line_counter = t1->second;
+			}
+			else
+			{
+				int t1 = stoi(a.argument1, nullptr, 10);
+				line_counter = t1;
+			}
+		}
+		else
+			std::cout << "Skok neuspijesan!" << std::endl;
+	}
+	if (!(strcmp(a.naziv.c_str(), "JNE")))
+	{
+		if (cmp)
+		{
+			if (Labele.contains(a.argument1)) {
+				auto t1 = Labele.find(a.argument1);
+				line_counter = t1->second;
+			}
+			else
+			{
+				int t1 = stoi(a.argument1, nullptr, 10);
+				line_counter = t1;
+			}
+		}
+		else
+			std::cout << "Skok neuspijesan!" << std::endl;
+	}
+	if (!(strcmp(a.naziv.c_str(), "JGE")))
+	{
+		if (cmp>=0)
+		{
+			if (Labele.contains(a.argument1)) {
+				auto t1 = Labele.find(a.argument1);
+				line_counter = t1->second;
+			}
+			else
+			{
+				int t1 = stoi(a.argument1, nullptr, 10);
+				line_counter = t1;
+			}
+		}
+		else
+			std::cout << "Skok neuspijesan!" << std::endl;
+	}
+	if (!(strcmp(a.naziv.c_str(), "JNE")))
+	{
+		if (cmp<0)
+		{
+			if (Labele.contains(a.argument1)) {
+				auto t1 = Labele.find(a.argument1);
+				line_counter = t1->second;
+			}
+			else
+			{
+				int t1 = stoi(a.argument1, nullptr, 10);
+				line_counter = t1;
+			}
+		}
+		else
+			std::cout << "Skok neuspijesan!" << std::endl;
+	}
 }
 
 void IS::Procesor::pravljenjeRegistara()
 {
-	this->Registri.insert({ "EAX", (long)0 });
 	this->Registri.insert({ "EBX", (long)0 });
+	this->Registri.insert({ "EAX", (long)0 });
 	this->Registri.insert({ "ECX", (long)0 });
 	this->Registri.insert({ "EDX", (long)0 });
 }
