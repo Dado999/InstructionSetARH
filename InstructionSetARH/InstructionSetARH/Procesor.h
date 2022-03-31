@@ -10,14 +10,14 @@ namespace IS
 	class Procesor : public Memorija
 	{
 	private:
-		std::unordered_map<std::string, long long> Labele;
+		std::unordered_map<std::string, int> Labele;
 		std::unordered_map<std::string, int> Registri;
 		std::vector<std::string> data;
 		std::vector<std::string> bss;
 		std::vector<std::string> text;
 		std::vector<std::string> ListaInstrukcija;
 		inline static int line_counter=0;
-		static int cmp;
+		inline static int cmp;
 	public:
 		Procesor();
 		~Procesor();
