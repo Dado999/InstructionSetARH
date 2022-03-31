@@ -17,6 +17,7 @@ namespace IS
 		std::vector<std::string> text;
 		std::vector<std::string> ListaInstrukcija;
 		inline static int line_counter=0;
+		static int cmp;
 	public:
 		Procesor();
 		~Procesor();
