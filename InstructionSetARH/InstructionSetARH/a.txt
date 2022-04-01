@@ -8,34 +8,35 @@
 	RES e
 	RES f
 .text
-	MOV [a] 3
-	AND [a] 3
-	STORE [a] [b]
-	ADD [a] b
-	ADD a [b]
+	MOV a 3
+	AND a 3
 	ADD a b
-	ADD a 3
-	ADD [a] b
+	JMP labela:
+	MOV a 0
+	ADD a b
+	AND a 3
+	AND a b
 	AND a [b]
-	STORE [a] 33
-	CMP [a] [b]
+	MOV a 33
+	CMP a a1
 	MOV EAX EBX
 	ADD d 5
 	ADD a 3
-	STORE c 10
-	JNE labela
+	MOV c 10
 	SUB b 6
-	STORE c 99
+	MOV c 99
 	ADD f 3
 	ADD EAX 6
 	SUB EBX 3
-	STORE a 3
-	STORE b 4
+	labela:
+	SUB a 1
+	OR b 4
 	NOT a
-	IN a
-	OUT a
 	ADD a 3
-	STORE EAX 4
-	MOV EBX EAX
-	LABELA:
-	OUT a
+	MOV EAX 4
+	ADD EBX EAX
+	out a
+	MOV a [b]
+	ADD a b
+	ADD a [b]
+	ADD a b
