@@ -34,12 +34,23 @@ IS::Instrukcija::Instrukcija(std::string a)
 		if (pos == std::string::npos)
 			break;
 	}
-	naziv = argumenti[0];
-	argument1 = argumenti[1];
-	if (argumenti.size() < 3)
-		argument2="";
+	if (argumenti.size() == 1) {
+		naziv = argumenti[0];
+		argument1 = "";
+		argument2 = "";
+	}
+	else if (argumenti.size() == 2)
+	{
+		naziv = argumenti[0];
+		argument1 = argumenti[1];
+		argument2 = "";
+	}
 	else
+	{
+		naziv = argumenti[0];
+		argument1 = argumenti[1];
 		argument2 = argumenti[2];
+	}
 }
 
 IS::Instrukcija::~Instrukcija(){}

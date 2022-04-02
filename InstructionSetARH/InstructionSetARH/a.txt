@@ -8,35 +8,26 @@
 	RES e
 	RES f
 .text
-	MOV a 3
-	AND a 3
-	ADD a b
-	JMP labela:
-	MOV a 0
-	ADD a b
-	AND a 3
-	AND a b
-	AND a [b]
+	ADD a 1
+	SUB b EAX
+	AND c [a1]
+	OR d 9
+	NOT b
 	MOV a 33
 	CMP a a1
-	MOV EAX EBX
-	ADD d 5
-	ADD a 3
-	MOV c 10
-	SUB b 6
-	MOV c 99
-	ADD f 3
-	ADD EAX 6
-	SUB EBX 3
+	ADD EDX 4
+	MOV EAX [EDX]
+	JMP labela
+	OUT f
+	IN e
+	CMP 1 2
 	labela:
-	SUB a 1
-	OR b 4
+	JGE 10
+	JNE 19
 	NOT a
 	ADD a 3
-	MOV EAX 4
-	ADD EBX EAX
-	out a
+	MOV EAX 5
+	AND EBX EAX
 	MOV a [b]
-	ADD a b
-	ADD a [b]
+	OR a b
 	ADD a b

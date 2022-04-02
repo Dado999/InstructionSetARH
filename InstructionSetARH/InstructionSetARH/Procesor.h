@@ -30,6 +30,6 @@ namespace IS
 		void statusRegistara();
 		void statusMemorije();
 		int provjeraSintakse();
-		void pokazivac(Instrukcija);
+		void pokazivac(Instrukcija&);
 	};
 }
