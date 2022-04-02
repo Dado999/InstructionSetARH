@@ -109,6 +109,7 @@ void IS::Procesor::Izvrsavanje()
 		std::cin >> c;
 		if (c == '2') {
 			debug = false;
+			--line_counter;
 			a.~Instrukcija();
 			continue;
 		}
@@ -118,9 +119,9 @@ void IS::Procesor::Izvrsavanje()
 	}
 	while (line_counter < text.size())
 	{
+		line_counter++;
 		Instrukcija a(text[line_counter]);
 		IzvrsavanjeInstrukcije(a);
-		line_counter++;
 	}
 	std::cout << "Izvrsavanje zavrseno! Finalno stanje registara i memorije: " << std::endl;
 	statusRegistara();
@@ -184,11 +185,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					t1->second = t1->second + temp;
 				}
 			}
-		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tSUB")))
@@ -246,11 +247,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					t1->second = t1->second - temp;
 				}
 			}
-		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tAND")))
@@ -308,11 +309,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					t1->second = t1->second & temp;
 				}
 			}
-		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tOR")))
@@ -370,11 +371,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					t1->second = t1->second | temp;
 				}
 			}
-		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tNOT")))
@@ -396,11 +397,6 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
 				std::exit(-1);
 			}
-		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tMOV")))
@@ -455,7 +451,7 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				{
 					long long temp = stoll(a.argument2, nullptr, 10);
 					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second | temp;
+					t1->second = temp;
 				}
 			}
 			else
@@ -464,22 +460,65 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				std::exit(-1);
 			}
 		}
-		else
-		{
-			std::cout << "Greska u kodu!" << std::endl;
-			std::exit(-1);
-		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJMP")))
 	{
-	if (Labele.contains("\t"+a.argument1))
-	{
-		auto t1 = Labele.find("\t"+a.argument1);
-		line_counter = t1->second + 1;
+	   if (Labele.contains("\t"+a.argument1))
+	   {
+	       auto t1 = Labele.find("\t"+a.argument1);
+	   	   line_counter = t1->second;
+	   }
+	   else {
+	   	   int temp = std::stoi(a.argument1, nullptr, 10);
+	   	   line_counter = temp;
+	   }
 	}
-	else {
-		int temp = std::stoi(a.argument1, nullptr, 10);
-		line_counter = temp;
+	else if (!(strcmp(a.naziv.c_str(), "\tIN")))
+	{
+		if (!(a.argument1.empty()))
+		{
+			if (Registri.contains(a.argument1))
+			{
+			    auto t1 = Registri.find(a.argument1);
+				std::cout << "Unesi novu vrijednost " << t1->first << " registra: ";
+				long long temp;
+				std::cin >> temp;
+				t1->second = temp;
+			}
+			else if (memorija.contains(a.argument1))
+			{
+				auto t1 = memorija.find(a.argument1);
+				std::cout << "Unesi novu vrijednost " << t1->first << ":";
+				long long temp;
+				std::cin >> temp;
+				t1->second = temp;
+			}
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
+		}
+	}
+	else if (!(strcmp(a.naziv.c_str(), "\tOUT")))
+	{
+	if (!(a.argument1.empty()))
+	{
+		if (Registri.contains(a.argument1))
+		{
+			auto t1 = Registri.find(a.argument1);
+			std::cout << "Ispis iz registra " << t1->first << ": " << t1->second << std::endl;
+		}
+		if (memorija.contains(a.argument1))
+		{
+			auto t1 = memorija.find(a.argument1);
+			std::cout << "Ispis iz memorije " << t1->first << ": " << t1->second << std::endl;
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
+		}
 	}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tCMP")))
@@ -569,11 +608,6 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				else if (temp1 < temp2) cmp = -1;
 			}
 		}
-		else
-		{
-			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-			std::exit(-1);
-		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJE")))
 	{
@@ -643,6 +677,10 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 		else
 			std::cout << "Skok neuspijesan!" << std::endl;
 	}
+	else if (!(a.naziv.empty()) && (a.argument1.empty()) && (a.argument2.empty()))
+	{
+		return;
+	}
 	else {
 	std::cout << "Nepoznata komanda! u liniji " << line_counter << "!" << std::endl;
 		exit(-1);
@@ -700,14 +738,17 @@ void IS::Procesor::pronadjiLabele()
 {
 	for (int i = 0; i < text.size(); i++)
 	{
-		if ((text[i].find(':')!=std::string::npos))
+		if ((text[i].find(':') != std::string::npos))
+		{
+			text[i].erase(std::remove(text[i].begin(), text[i].end(), ':'), text[i].end());
 			Labele.insert({ text[i] , i });
+		}
 	}
 }
 
-void IS::Procesor::pokazivac(Instrukcija a)
+void IS::Procesor::pokazivac(Instrukcija& a)
 {
-	if (a.argument1.find('[') >= 0)
+	if (a.argument1.find('[') >= 0 && a.argument1.find('[') != std::string::npos)
 	{
 		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), '['), a.argument1.end());
 		a.argument1.erase(std::remove(a.argument1.begin(), a.argument1.end(), ']'), a.argument1.end());
@@ -724,7 +765,7 @@ void IS::Procesor::pokazivac(Instrukcija a)
 			a.argument1 = temp;
 		}
 	}
-	else if (a.argument2.find('[') >= 0)
+	else if (a.argument2.find('[') >= 0 && a.argument2.find('[') != std::string::npos)
 	{
 		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), '['), a.argument2.end());
 		a.argument2.erase(std::remove(a.argument2.begin(), a.argument2.end(), ']'), a.argument2.end());
