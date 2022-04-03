@@ -10,16 +10,15 @@
 .text
 	ADD a 1
 	SUB b EAX
-	AND c [a1]
+	*AND c [a1]
 	OR d 9
-	NOT b
 	MOV a 33
 	CMP a a1
 	ADD EDX 4
 	MOV EAX [EDX]
 	JMP labela
 	OUT f
-	IN e
+	*IN e
 	CMP 1 2
 	labela:
 	JGE 10
