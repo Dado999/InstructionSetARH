@@ -35,18 +35,24 @@ IS::Instrukcija::Instrukcija(std::string a)
 			break;
 	}
 	if (argumenti.size() == 1) {
+		if(argumenti[0].find('*'))
+			argumenti[0].erase(std::remove(argumenti[0].begin(), argumenti[0].end(), '*'), argumenti[0].end());
 		naziv = argumenti[0];
 		argument1 = "";
 		argument2 = "";
 	}
 	else if (argumenti.size() == 2)
 	{
+		if (argumenti[0].find('*'))
+			argumenti[0].erase(std::remove(argumenti[0].begin(), argumenti[0].end(), '*'), argumenti[0].end());
 		naziv = argumenti[0];
 		argument1 = argumenti[1];
 		argument2 = "";
 	}
 	else
 	{
+		if (argumenti[0].find('*'))
+			argumenti[0].erase(std::remove(argumenti[0].begin(), argumenti[0].end(), '*'), argumenti[0].end());
 		naziv = argumenti[0];
 		argument1 = argumenti[1];
 		argument2 = argumenti[2];

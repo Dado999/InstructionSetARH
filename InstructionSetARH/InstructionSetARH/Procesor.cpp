@@ -54,8 +54,9 @@ void IS::Procesor::getInstructions()
 				data.push_back(ListaInstrukcija[d + 1]);
 			for (int i = 0; b < t-1; b++, i++)
 				bss.push_back(ListaInstrukcija[b + 1]);
-			for (int i = 0; t < ListaInstrukcija.size()-1; t++, i++)
+			for (int i = 0; t < ListaInstrukcija.size() - 1; t++, i++) {
 				text.push_back(ListaInstrukcija[t + 1]);
+			}
 		}
 		else
 			throw;
@@ -105,21 +106,31 @@ void IS::Procesor::Izvrsavanje()
 		std::cout << "Instrukcija izvrsena! Status registara i memorije: " << std::endl;
 		statusRegistara();
 		statusMemorije();
-		std::cout << "Za sledecu instrukciju unesi 1, za nastavak bez debagovanja unesi 2:";
+		std::cout << "Za sledecu instrukciju unesi 1, za nastavak bez debagovanja unesi 2 a za skok na sledecu breakpoint tacku unesi 3:";
 		std::cin >> c;
 		if (c == '2') {
 			debug = false;
 			--line_counter;
-			a.~Instrukcija();
 			continue;
+		}
+		else if (c == '3')
+		{
+			int br = 1;
+			line_counter++;
+			for (; line_counter < text.size() && text[line_counter].find('*') == std::string::npos; line_counter++, br++);
+			if (line_counter >= text.size()) {
+				line_counter -= ++br;
+				std::cout << "Nije pronadjena nijedna breakpoint tacka, izvrsavanje se nastavlja bez debagovanja!" << std::endl;
+				debug = false;
+				continue;
+			}
+			line_counter--;
 		}
 		else if (c != '1')
 			std::cout << "Pogresan unos, nastavlja se izvrsavanje sa debagovanjem";
-		a.~Instrukcija();
 	}
-	while (line_counter < text.size())
+	while (++line_counter < text.size())
 	{
-		line_counter++;
 		Instrukcija a(text[line_counter]);
 		IzvrsavanjeInstrukcije(a);
 	}
