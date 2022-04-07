@@ -76,14 +76,15 @@ void IS::Procesor::ucitavanjePodataka()
 		line = data[i];
 		Instrukcija a(line);
 		long long temp = std::stoll(a.argument2, nullptr, 10);
-		this->memorija.insert({ a.argument1,temp });
-		a.~Instrukcija();
+		IS::Memorija b(a.argument1, temp, this->adresa++);
+		this->Memorija.push_back(b);
 	}
 	for (int i = 0; i < bss.size(); i++)
 	{
 		line = bss[i];
 		Instrukcija a(line);
-		this->memorija.insert({ a.argument1,0});
+		IS::Memorija b(a.argument1, 0,this->adresa++);
+		this->Memorija.push_back(b);
 		a.~Instrukcija();
 	}
 }
@@ -117,13 +118,18 @@ void IS::Procesor::Izvrsavanje()
 		{
 			int br = 1;
 			line_counter++;
-			for (; line_counter < text.size() && text[line_counter].find('*') == std::string::npos; line_counter++, br++);
-			if (line_counter >= text.size()) {
-				line_counter -= ++br;
-				std::cout << "Nije pronadjena nijedna breakpoint tacka, izvrsavanje se nastavlja bez debagovanja!" << std::endl;
-				debug = false;
-				continue;
+			for (; line_counter < text.size() && text[line_counter].find('*') == std::string::npos; line_counter++, br++)
+			{
+				Instrukcija a(text[line_counter]);
+				IzvrsavanjeInstrukcije(a);
+				if (line_counter >= text.size()) {
+					debug = false;
+					continue;
+				}
 			}
+			std::cout << "Status registara i memorije na breakpoint tacki" << std::endl;
+			statusRegistara();
+			statusMemorije();
 			line_counter--;
 		}
 		else if (c != '1')
@@ -143,9 +149,9 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 {
 	if (!(strcmp(a.naziv.c_str(), "\tADD")))
 	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
-		{
 			pokazivac(a);
+			int t1 = provjeraMemorije(a.argument1);
+			int t2 = provjeraMemorije(a.argument2);
 			if (Registri.contains(a.argument1))
 			{
 				if (Registri.contains(a.argument2))
@@ -154,11 +160,10 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					auto t2 = Registri.find(a.argument2);
 					t1->second = t1->second + t2->second;
 				}
-				else if (memorija.contains(a.argument2))
+				else if (t2>=0)
 				{
 					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second + t2->second;
+					t1->second = t1->second + this->Memorija[t2].vrijednost;
 				}
 				else
 				{
@@ -169,11 +174,10 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			}
 			else if (Registri.contains(a.argument2))
 			{
-				if (memorija.contains(a.argument1))
+				if (t1>=0)
 				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					t1->second = t1->second + t2->second;
+					auto t2 = Registri.find(a.argument2);
+					this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost + t2->second;
 				}
 				else
 				{
@@ -181,20 +185,54 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 					std::exit(-1);
 				}
 			}
-			else if (memorija.contains(a.argument1))
+			else if (t1>=0)
 			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second + t2->second;
+				if (t2>=0) {
+					this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost + this->Memorija[t1].vrijednost;
 				}
 				else
 				{
 					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second + temp;
+					this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost + temp;
 				}
+			}
+			else
+			{
+				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+				std::exit(-1);
+			}
+	}
+	else if (!(strcmp(a.naziv.c_str(), "\tSUB")))
+	{
+		pokazivac(a);
+		int t1 = provjeraMemorije(a.argument1);
+		int t2 = provjeraMemorije(a.argument2);
+		if (Registri.contains(a.argument1))
+		{
+			if (Registri.contains(a.argument2))
+			{
+				auto t1 = Registri.find(a.argument1);
+				auto t2 = Registri.find(a.argument2);
+				t1->second = t1->second - t2->second;
+			}
+			else if (t2>=0)
+			{
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second - this->Memorija[t2].vrijednost;
+			}
+			else
+			{
+				long long temp = stoll(a.argument2, nullptr, 10);
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second - temp;
+			}
+		}
+		else if (Registri.contains(a.argument2))
+		{
+			if (t1>=0)
+			{
+				auto t2 = Registri.find(a.argument2);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost - t2->second;
 			}
 			else
 			{
@@ -202,275 +240,204 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 				std::exit(-1);
 			}
 		}
-	}
-	else if (!(strcmp(a.naziv.c_str(), "\tSUB")))
-	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		else if (t1>=0)
 		{
-			pokazivac(a);
-			if (Registri.contains(a.argument1))
-			{
-				if (Registri.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = Registri.find(a.argument2);
-					t1->second = t1->second - t2->second;
-				}
-				else if (memorija.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second - t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = Registri.find(a.argument1);
-					t1->second = t1->second - temp;
-				}
-			}
-			else if (Registri.contains(a.argument2))
-			{
-				if (memorija.contains(a.argument1))
-				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					t1->second = t1->second - t2->second;
-				}
-				else
-				{
-					std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-					std::exit(-1);
-				}
-			}
-			else if (memorija.contains(a.argument1))
-			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second - t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second - temp;
-				}
+			if (t2>=0) {
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost - this->Memorija[t2].vrijednost;
 			}
 			else
 			{
-				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-				std::exit(-1);
+				long long temp = stoll(a.argument2, nullptr, 10);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost + temp;
 			}
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tAND")))
 	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		pokazivac(a);
+		int t1 = provjeraMemorije(a.argument1);
+		int t2 = provjeraMemorije(a.argument2);
+		if (Registri.contains(a.argument1))
 		{
-			pokazivac(a);
-			if (Registri.contains(a.argument1))
+			if (Registri.contains(a.argument2))
 			{
-				if (Registri.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = Registri.find(a.argument2);
-					t1->second = t1->second & t2->second;
-				}
-				else if (memorija.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second & t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = Registri.find(a.argument1);
-					t1->second = t1->second & temp;
-				}
+				auto t1 = Registri.find(a.argument1);
+				auto t2 = Registri.find(a.argument2);
+				t1->second = t1->second & t2->second;
 			}
-			else if (Registri.contains(a.argument2))
+			else if (t2>=0)
 			{
-				if (memorija.contains(a.argument1))
-				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					t1->second = t1->second & t2->second;
-				}
-				else
-				{
-					std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-					std::exit(-1);
-				}
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second & this->Memorija[t2].vrijednost;
 			}
-			else if (memorija.contains(a.argument1))
+			else
 			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second & t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second & temp;
-				}
+				long long temp = stoll(a.argument2, nullptr, 10);
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second & temp;
+			}
+		}
+		else if (Registri.contains(a.argument2))
+		{
+			if (t1>=0)
+			{
+				auto t2 = Registri.find(a.argument2);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost & t2->second;
 			}
 			else
 			{
 				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
 				std::exit(-1);
 			}
+		}
+		else if (t1>=0)
+		{
+			if (t2>=0) {
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost & this->Memorija[t2].vrijednost;
+			}
+			else
+			{
+				long long temp = stoll(a.argument2, nullptr, 10);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost & temp;
+			}
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tOR")))
 	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		pokazivac(a);
+		int t1 = provjeraMemorije(a.argument1);
+		int t2 = provjeraMemorije(a.argument2);
+		if (Registri.contains(a.argument1))
 		{
-			pokazivac(a);
-			if (Registri.contains(a.argument1))
+			if (Registri.contains(a.argument2))
 			{
-				if (Registri.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = Registri.find(a.argument2);
-					t1->second = t1->second | t2->second;
-				}
-				else if (memorija.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second | t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = Registri.find(a.argument1);
-					t1->second = t1->second | temp;
-				}
+				auto t1 = Registri.find(a.argument1);
+				auto t2 = Registri.find(a.argument2);
+				t1->second = t1->second | t2->second;
 			}
-			else if (Registri.contains(a.argument2))
+			else if (t2>=0)
 			{
-				if (memorija.contains(a.argument1))
-				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					t1->second = t1->second | t2->second;
-				}
-				else
-				{
-					std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-					std::exit(-1);
-				}
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second | this->Memorija[t2].vrijednost;
 			}
-			else if (memorija.contains(a.argument1))
+			else
 			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second | t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					t1->second = t1->second | temp;
-				}
+				long long temp = stoll(a.argument2, nullptr, 10);
+				auto t1 = Registri.find(a.argument1);
+				t1->second = t1->second | temp;
+			}
+		}
+		else if (Registri.contains(a.argument2))
+		{
+			if (t1>=0)
+			{
+				auto t2 = Registri.find(a.argument2);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost | t2->second;
 			}
 			else
 			{
 				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
 				std::exit(-1);
 			}
+		}
+		else if (t1>=0)
+		{
+			if (t2>=0) {
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost | this->Memorija[t2].vrijednost;
+			}
+			else
+			{
+				long long temp = stoll(a.argument2, nullptr, 10);
+				this->Memorija[t1].vrijednost = this->Memorija[t1].vrijednost | temp;
+			}
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tNOT")))
 	{
-		if (!(a.argument1.empty()))
+		int t1 = provjeraMemorije(a.argument1);
+		if (Registri.contains(a.argument1))
 		{
-			if (Registri.contains(a.argument1))
-			{
-				auto t1 = Registri.find(a.argument1);
-				t1->second = ~t1->second;
-			}
-			else if (memorija.contains(a.argument1))
-			{
-				auto t1 = memorija.find(a.argument1);
-				t1->second = ~t1->second;
-			}
-			else
-			{
-				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-				std::exit(-1);
-			}
+			auto t1 = Registri.find(a.argument1);
+			t1->second = ~t1->second;
+		}
+		else if (t1>=0)
+		{
+			this->Memorija[t1].vrijednost = ~this->Memorija[t1].vrijednost;
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tMOV")))
 	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+	pokazivac(a);
+	int t1 = provjeraMemorije(a.argument1);
+	int t2 = provjeraMemorije(a.argument2);
+	if (Registri.contains(a.argument1))
+	{
+		if (Registri.contains(a.argument2))
 		{
-			pokazivac(a);
-			if (Registri.contains(a.argument1))
-			{
-				if (Registri.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = Registri.find(a.argument2);
-					t1->second = t2->second;
-				}
-				else if (memorija.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = Registri.find(a.argument1);
-					t1->second = temp;
-				}
-			}
-			else if (Registri.contains(a.argument2))
-			{
-				if (memorija.contains(a.argument1))
-				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					t2->second = t1->second;
-				}
-				else
-				{
-					std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-					std::exit(-1);
-				}
-			}
-			else if (memorija.contains(a.argument1))
-			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					t1->second = t1->second | t2->second;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					t1->second = temp;
-				}
-			}
-			else
-			{
-				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-				std::exit(-1);
-			}
+			auto t1 = Registri.find(a.argument1);
+			auto t2 = Registri.find(a.argument2);
+			t1->second = t2->second;
 		}
+		else if (t2>=0)
+		{
+			auto t1 = Registri.find(a.argument1);
+			t1->second = this->Memorija[t2].vrijednost;
+		}
+		else
+		{
+			long long temp = stoll(a.argument2, nullptr, 10);
+			auto t1 = Registri.find(a.argument1);
+			t1->second = temp;
+		}
+	}
+	else if (Registri.contains(a.argument2))
+	{
+		if (t1>=0)
+		{
+			auto t2 = Registri.find(a.argument2);
+			this->Memorija[t1].vrijednost = t2->second;
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
+		}
+	}
+	else if (t1>=0)
+	{
+		if (t2>=0) 
+			this->Memorija[t1].vrijednost = this->Memorija[t2].vrijednost;
+		else
+		{
+			long long temp = stoll(a.argument2, nullptr, 10);
+			this->Memorija[t1].vrijednost = temp;
+		}
+	}
+	else
+	{
+		std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+		std::exit(-1);
+	}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJMP")))
 	{
@@ -481,49 +448,26 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 	   }
 	   else {
 	   	   int temp = std::stoi(a.argument1, nullptr, 10);
-	   	   line_counter = temp;
+	   	   line_counter = --temp;
 	   }
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tIN")))
 	{
-		if (!(a.argument1.empty()))
-		{
-			if (Registri.contains(a.argument1))
-			{
-			    auto t1 = Registri.find(a.argument1);
-				std::cout << "Unesi novu vrijednost " << t1->first << " registra: ";
-				long long temp;
-				std::cin >> temp;
-				t1->second = temp;
-			}
-			else if (memorija.contains(a.argument1))
-			{
-				auto t1 = memorija.find(a.argument1);
-				std::cout << "Unesi novu vrijednost " << t1->first << ":";
-				long long temp;
-				std::cin >> temp;
-				t1->second = temp;
-			}
-			else
-			{
-				std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
-				std::exit(-1);
-			}
-		}
-	}
-	else if (!(strcmp(a.naziv.c_str(), "\tOUT")))
-	{
-	if (!(a.argument1.empty()))
-	{
+		int t1 = provjeraMemorije(a.argument1);
 		if (Registri.contains(a.argument1))
 		{
-			auto t1 = Registri.find(a.argument1);
-			std::cout << "Ispis iz registra " << t1->first << ": " << t1->second << std::endl;
+		    auto t1 = Registri.find(a.argument1);
+			std::cout << "Unesi novu vrijednost " << t1->first << " registra: ";
+			long long temp;
+			std::cin >> temp;
+			t1->second = temp;
 		}
-		if (memorija.contains(a.argument1))
+		else if (t1>=0)
 		{
-			auto t1 = memorija.find(a.argument1);
-			std::cout << "Ispis iz memorije " << t1->first << ": " << t1->second << std::endl;
+			std::cout << "Unesi novu vrijednost " << this->Memorija[t1].naziv << ":";
+			long long temp;
+			std::cin >> temp;
+			this->Memorija[t1].vrijednost = temp;
 		}
 		else
 		{
@@ -531,93 +475,103 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			std::exit(-1);
 		}
 	}
+	else if (!(strcmp(a.naziv.c_str(), "\tOUT")))
+	{
+		int t1 = provjeraMemorije(a.argument1);
+		if (Registri.contains(a.argument1))
+		{
+			auto t1 = Registri.find(a.argument1);
+			std::cout << "Ispis iz registra " << t1->first << ": " << t1->second << std::endl;
+		}
+		if (t1>=0)
+		{
+			std::cout << "Ispis iz memorije " << this->Memorija[t1].naziv << ": " << this->Memorija[t1].vrijednost << std::endl;
+		}
+		else
+		{
+			std::cout << "Greska u " << line_counter << " liniji koda!" << std::endl;
+			std::exit(-1);
+		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tCMP")))
 	{
-		if (!(a.argument1.empty()) && !(a.argument2.empty()))
+		int t1 = provjeraMemorije(a.argument1);
+		int t2 = provjeraMemorije(a.argument2);
+		pokazivac(a);
+		if (Registri.contains(a.argument1))
 		{
-			pokazivac(a);
-			if (Registri.contains(a.argument1))
+			if (Registri.contains(a.argument2))
 			{
-				if (Registri.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = Registri.find(a.argument2);
-					if (t1->second > t2->second) cmp = 1;
-					else if (t1->second == t2->second) cmp = 0;
-					else if (t1->second < t2->second) cmp = -1;
-				}
-				else if (memorija.contains(a.argument2))
-				{
-					auto t1 = Registri.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					if (t1->second > t2->second) cmp = 1;
-					else if (t1->second == t2->second) cmp = 0;
-					else if (t1->second < t2->second) cmp = -1;
-				}
-				else
-				{
-					auto t1 = Registri.find(a.argument1);
-					long long temp = stoll(a.argument2, nullptr, 10);
-					if (t1->second > temp) cmp = 1;
-					else if (t1->second == temp) cmp = 0;
-					else if (t1->second < temp) cmp = -1;
-				}
+				auto t1 = Registri.find(a.argument1);
+				auto t2 = Registri.find(a.argument2);
+				if (t1->second > t2->second) cmp = 1;
+				else if (t1->second == t2->second) cmp = 0;
+				else if (t1->second < t2->second) cmp = -1;
 			}
-			else if (Registri.contains(a.argument2))
+			else if (t2>=0)
 			{
-				if (memorija.contains(a.argument1))
-				{
-					auto t1 = Registri.find(a.argument2);
-					auto t2 = memorija.find(a.argument1);
-					if (t1->second > t2->second) cmp = 1;
-					else if (t1->second == t2->second) cmp = 0;
-					else if (t1->second < t2->second) cmp = -1;
-				}
-				else
-				{
-					long long temp = stoll(a.argument1, nullptr, 10);
-					auto t1 = Registri.find(a.argument2);
-					if (temp > t1->second) cmp = 1;
-					else if (temp == t1->second) cmp = 0;
-					else if (temp < t1->second) cmp = -1;
-				}
+				auto t1 = Registri.find(a.argument1);
+				if (t1->second > this->Memorija[t2].vrijednost) cmp = 1;
+				else if (t1->second == this->Memorija[t2].vrijednost) cmp = 0;
+				else if (t1->second < this->Memorija[t2].vrijednost) cmp = -1;
 			}
-			else if (memorija.contains(a.argument1))
+			else
 			{
-				if (memorija.contains(a.argument2))
-				{
-					auto t1 = memorija.find(a.argument1);
-					auto t2 = memorija.find(a.argument2);
-					if (t1->second > t2->second) cmp = 1;
-					else if (t1->second == t2->second) cmp = 0;
-					else if (t1->second < t2->second) cmp = -1;
-				}
-				else
-				{
-					long long temp = stoll(a.argument2, nullptr, 10);
-					auto t1 = memorija.find(a.argument1);
-					if (t1->second > temp) cmp = 1;
-					else if (t1->second == temp) cmp = 0;
-					else if (t1->second < temp) cmp = -1;
-				}
+				auto t1 = Registri.find(a.argument1);
+				long long temp = stoll(a.argument2, nullptr, 10);
+				if (t1->second > temp) cmp = 1;
+				else if (t1->second == temp) cmp = 0;
+				else if (t1->second < temp) cmp = -1;
 			}
-			else if (memorija.contains(a.argument2))
+		}
+		else if (Registri.contains(a.argument2))
+		{
+			if (t1>=0)
+			{
+				auto t2 = Registri.find(a.argument2);
+				if (this->Memorija[t1].vrijednost > t2->second) cmp = 1;
+				else if (this->Memorija[t1].vrijednost == t2->second) cmp = 0;
+				else if (this->Memorija[t1].vrijednost < t2->second) cmp = -1;
+			}
+			else
 			{
 				long long temp = stoll(a.argument1, nullptr, 10);
-				auto t1 = memorija.find(a.argument2);
+				auto t1 = Registri.find(a.argument2);
 				if (temp > t1->second) cmp = 1;
 				else if (temp == t1->second) cmp = 0;
 				else if (temp < t1->second) cmp = -1;
 			}
+		}
+		else if (t1>=0)
+		{
+			if (t2>=0)
+			{
+				if (this->Memorija[t1].vrijednost > this->Memorija[t2].vrijednost) cmp = 1;
+				else if (this->Memorija[t1].vrijednost == this->Memorija[t2].vrijednost) cmp = 0;
+				else if (this->Memorija[t1].vrijednost < this->Memorija[t2].vrijednost) cmp = -1;
+			}
 			else
 			{
-				long long temp1 = stoll(a.argument1, nullptr, 10);
-				long long temp2 = stoll(a.argument2, nullptr, 10);
-				if (temp1 > temp2) cmp = 1;
-				else if (temp1 == temp2) cmp = 0;
-				else if (temp1 < temp2) cmp = -1;
+				long long temp = stoll(a.argument2, nullptr, 10);
+				if (this->Memorija[t1].vrijednost > temp) cmp = 1;
+				else if (this->Memorija[t1].vrijednost == temp) cmp = 0;
+				else if (this->Memorija[t1].vrijednost < temp) cmp = -1;
 			}
+		}
+		else if (t2>=0)
+		{
+			long long temp = stoll(a.argument1, nullptr, 10);
+			if (this->Memorija[t2].vrijednost > temp) cmp = 1;
+			else if (this->Memorija[t2].vrijednost == temp) cmp = 0;
+			else if (this->Memorija[t2].vrijednost < temp) cmp = -1;
+		}
+		else
+		{
+			long long temp1 = stoll(a.argument1, nullptr, 10);
+			long long temp2 = stoll(a.argument2, nullptr, 10);
+			if (temp1 > temp2) cmp = 1;
+			else if (temp1 == temp2) cmp = 0;
+			else if (temp1 < temp2) cmp = -1;
 		}
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJE")))
@@ -631,11 +585,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			else
 			{
 				int t1 = stoi(a.argument1, nullptr, 10);
-				line_counter = t1;
+				line_counter = --t1;
 			}
 		}
 		else
-			std::cout << "Skok neuspijesan!" << std::endl;
+			std::cout << "Skok neuspjesan!" << std::endl;
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJNE")))
 	{
@@ -648,7 +602,7 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			else
 			{
 				int t1 = stoi(a.argument1, nullptr, 10);
-				line_counter = t1;
+				line_counter = --t1;
 			}
 		}
 		else
@@ -665,11 +619,11 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			else
 			{
 				int t1 = stoi(a.argument1, nullptr, 10);
-				line_counter = t1;
+				line_counter = --t1;
 			}
 		}
 		else
-			std::cout << "Skok neuspijesan!" << std::endl;
+			std::cout << "Skok neuspjesan!" << std::endl;
 	}
 	else if (!(strcmp(a.naziv.c_str(), "\tJNE")))
 	{
@@ -682,16 +636,16 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 			else
 			{
 				int t1 = stoi(a.argument1, nullptr, 10);
-				line_counter = t1;
+				line_counter = --t1;
 			}
 		}
 		else
-			std::cout << "Skok neuspijesan!" << std::endl;
+			std::cout << "Skok neuspjesan!" << std::endl;
 	}
 	else if (!(a.naziv.empty()) && (a.argument1.empty()) && (a.argument2.empty()))
 	{
 		return;
-	}
+	} 
 	else {
 	std::cout << "Nepoznata komanda! u liniji " << line_counter << "!" << std::endl;
 		exit(-1);
@@ -700,10 +654,10 @@ void IS::Procesor::IzvrsavanjeInstrukcije(Instrukcija a)
 
 void IS::Procesor::pravljenjeRegistara()
 {
-	this->Registri.insert({ "EBX", (long)0 });
-	this->Registri.insert({ "EAX", (long)0 });
-	this->Registri.insert({ "ECX", (long)0 });
-	this->Registri.insert({ "EDX", (long)0 });
+	this->Registri.insert({ "RAX", (long)0 });
+	this->Registri.insert({ "RBX", (long)0 });
+	this->Registri.insert({ "RCX", (long)0 });
+	this->Registri.insert({ "RDX", (long)0 });
 }
 
 void IS::Procesor::statusRegistara()
@@ -716,8 +670,8 @@ void IS::Procesor::statusRegistara()
 void IS::Procesor::statusMemorije()
 {
 	std::cout << "=====Memorija=====" << std::endl;
-	for (auto x : memorija)
-		std::cout << x.first << " " << x.second << std::endl;
+	for (auto x : this->Memorija)
+		std::cout << x.naziv << " " << x.vrijednost << std::endl;
 }
 
 int IS::Procesor::provjeraSintakse()
@@ -745,6 +699,16 @@ int IS::Procesor::provjeraSintakse()
 	return 1;
 }
 
+int IS::Procesor::provjeraMemorije(std::string& a)
+{
+	for (int i=0;i<this->Memorija.size();i++)
+	{
+		if (this->Memorija[i].naziv == a)
+			return i;
+	}
+	return -1;
+}
+
 void IS::Procesor::pronadjiLabele()
 {
 	for (int i = 0; i < text.size(); i++)
@@ -766,14 +730,22 @@ void IS::Procesor::pokazivac(Instrukcija& a)
 		if (Registri.contains(a.argument1))
 		{
 			auto t1 = Registri.find(a.argument1);
-			std::string temp = std::to_string(t1->second);
-			a.argument1 = temp;
+				if (this->Memorija[t1->second].adresa >= 0 && t1->second < this->Memorija.size()) {
+					a.argument1 = this->Memorija[t1->second].naziv;
+					return;
+				}
+			std::cout << "Nepoznata memorijska lokacija!" << std::endl;
+			exit(-1);
 		}
-		else if (memorija.contains(a.argument1))
+		else
 		{
-			auto t1 = memorija.find(a.argument1);
-			std::string temp = std::to_string(t1->second);
-			a.argument1 = temp;
+			int temp = stoi(a.argument1);
+			if (this->Memorija[temp].adresa >= 0 && temp < this->Memorija.size()) {
+				a.argument1 = this->Memorija[temp].naziv;
+				return;
+			}
+			std::cout << "Nepoznata memorijska lokacija!" << std::endl;
+			exit(-1);
 		}
 	}
 	else if (a.argument2.find('[') >= 0 && a.argument2.find('[') != std::string::npos)
@@ -783,14 +755,22 @@ void IS::Procesor::pokazivac(Instrukcija& a)
 		if (Registri.contains(a.argument2))
 		{
 			auto t1 = Registri.find(a.argument2);
-			std::string temp = std::to_string(t1->second);
-			a.argument2 = temp;
+			if (this->Memorija[t1->second].adresa >= 0 && t1->second < this->Memorija.size()) {
+				a.argument2 = this->Memorija[t1->second].naziv;
+				return;
+			}
+			std::cout << "Nepoznata memorijska lokacija!" << std::endl;
+			exit(-1);
 		}
-		else if (memorija.contains(a.argument2))
+		else
 		{
-			auto t1 = memorija.find(a.argument2);
-			std::string temp = std::to_string(t1->second);
-			a.argument2 = temp;
+			int temp = stoi(a.argument2);
+			if (this->Memorija[temp].adresa >= 0 && temp < this->Memorija.size()) {
+				a.argument2 = this->Memorija[temp].naziv;
+				return;
+			}
+			std::cout << "Nepoznata memorijska lokacija!" << std::endl;
+			exit(-1);
 		}
 	}
 	else if (Labele.contains(a.naziv))

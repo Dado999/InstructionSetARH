@@ -16,7 +16,9 @@ namespace IS
 		std::vector<std::string> bss;
 		std::vector<std::string> text;
 		std::vector<std::string> ListaInstrukcija;
+		std::vector<IS::Memorija> Memorija;
 		inline static int line_counter=0;
+		inline static int adresa = 0;
 		inline static int cmp;
 	public:
 		Procesor();
@@ -30,6 +32,7 @@ namespace IS
 		void statusRegistara();
 		void statusMemorije();
 		int provjeraSintakse();
+		int provjeraMemorije(std::string&);
 		void pokazivac(Instrukcija&);
 	};
 }

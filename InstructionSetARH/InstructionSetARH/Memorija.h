@@ -8,7 +8,13 @@ namespace IS
 	class Memorija
 	{
 	public:
-		std::unordered_map<std::string, long long> memorija;
+		std::string naziv;
+		long long vrijednost;
+		int adresa;
+		Memorija(int);
+		Memorija(std::string,long long);
+		Memorija(std::string,long long,int);
+		Memorija(const Memorija&);
 		Memorija() = default;
 	};
 }
