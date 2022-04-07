@@ -8,25 +8,25 @@
 	RES e
 	RES f
 .text
-	ADD a 1
-	SUB b EAX
-	*AND c [a1]
+	ADD [RAX] 1
+	SUB b [1]
+	*AND c a1
 	OR d 9
-	MOV a 33
+	MOV [1] 33
 	CMP a a1
-	ADD EDX 4
-	MOV EAX [EDX]
-	JMP labela
+	ADD RDX 4
+	MOV RAX [1]
+	*JMP labela
 	OUT f
-	*IN e
+	IN e
 	CMP 1 2
 	labela:
 	JGE 10
 	JNE 19
 	NOT a
 	ADD a 3
-	MOV EAX 5
-	AND EBX EAX
-	MOV a [b]
+	MOV RAX 5
+	AND RBX RAX
+	MOV a b
 	OR a b
 	ADD a b

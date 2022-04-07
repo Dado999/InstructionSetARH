@@ -144,11 +144,13 @@
     <ClCompile Include="InstructionSetARH.cpp" />
     <ClCompile Include="Instrukcija.cpp" />
     <ClCompile Include="Memorija.cpp" />
+    <ClCompile Include="MemorijskaLokacija.cpp" />
     <ClCompile Include="Procesor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Instrukcija.h" />
     <ClInclude Include="Memorija.h" />
+    <ClInclude Include="MemorijskaLokacija.h" />
     <ClInclude Include="Procesor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
