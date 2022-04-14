@@ -60,5 +60,3 @@ IS::Instrukcija::Instrukcija(std::string a)
 }
 
 IS::Instrukcija::~Instrukcija(){}
-
-
