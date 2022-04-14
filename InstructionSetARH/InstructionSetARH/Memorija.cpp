@@ -1,12 +1,6 @@
 #include "Memorija.h"
 #include <iostream>
 
-IS::Memorija::Memorija(int a)
-{
-	naziv = "";
-	vrijednost = a;
-}
-
 IS::Memorija::Memorija(std::string naziv,long long vrijednost)
 {
 	this->naziv = naziv;

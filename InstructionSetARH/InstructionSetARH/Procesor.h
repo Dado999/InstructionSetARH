@@ -7,7 +7,7 @@
 
 namespace IS
 {
-	class Procesor : public Memorija
+	class Procesor
 	{
 	private:
 		std::unordered_map<std::string, int> Labele;
@@ -17,22 +17,25 @@ namespace IS
 		std::vector<std::string> text;
 		std::vector<std::string> ListaInstrukcija;
 		std::vector<IS::Memorija> Memorija;
-		inline static int line_counter=0;
-		inline static int adresa = 0;
-		inline static int cmp;
+		int line_counter=0;
+		int adresa = 0;
+		int cmp;
 	public:
 		Procesor();
 		~Procesor();
+		void dobaviInstrukcije();
+		void ucitajPodatke();
+		void izvrsi();
+		void izvrsiInstrukciju(Instrukcija);
+		void izvrsiInstrukcijuPomocna(Instrukcija&, char);
+		void izvrsiInstrukcijuPomocnaSkokovi(Instrukcija);
 		void pravljenjeRegistara();
-		void pronadjiLabele();
-		void getInstructions();
-		void ucitavanjePodataka();
-		void Izvrsavanje();
-		void IzvrsavanjeInstrukcije(Instrukcija);
-		void statusRegistara();
-		void statusMemorije();
+		void ispisiStanjeRegistara();
+		void ispisiStanjeMemorije();
 		int provjeraSintakse();
 		int provjeraMemorije(std::string&);
-		void pokazivac(Instrukcija&);
+		void pronadjiLabele();
+		void dohvatiAdresu(Instrukcija&);
+		void dohvatiAdresuPomocna(std::string& a);
 	};
 }
